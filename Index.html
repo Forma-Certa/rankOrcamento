@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Forma Certa · Sistema de Cotações 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --g:#00C58E;--g2:#00A87A;--g3:#E6FAF4;
+  --b:#2563EB;--b2:#EFF6FF;--b3:#BFDBFE;
+  --a:#F59E0B;--a2:#FFFBEB;--a3:#FDE68A;
+  --r:#EF4444;--r2:#FEF2F2;--r3:#FECACA;
+  --v:#7C3AED;--v2:#F5F3FF;
+  --c:#0284C7;--c2:#E0F2FE;
+  --ink:#0F172A;--ink2:#334155;--ink3:#64748B;--ink4:#94A3B8;
+  --line:#E2E8F0;--line2:#F1F5F9;--bg:#F8FAFC;--card:#FFFFFF;
+  --mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+.syne{font-family:"Syne",sans-serif}
+.shell{display:flex;min-height:100vh}
+/* SIDEBAR */
+.sb{width:220px;background:var(--ink);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo{font-family:"Syne",sans-serif;font-size:17px;font-weight:800;color:#fff}
+.sb-sub{font-size:10px;color:rgba(255,255,255,.3);margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+.sb-nav{padding:12px 0;flex:1}
+.sb-sec{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.22);padding:12px 20px 5px}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 20px;cursor:pointer;color:rgba(255,255,255,.5);font-size:12px;font-weight:500;transition:all .15s;border-left:3px solid transparent}
+.sb-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+.sb-item.on{color:#fff;background:rgba(0,197,142,.12);border-left-color:var(--g)}
+.sb-row{display:flex;justify-content:space-between;align-items:center;padding:5px 20px}
+.sb-rl{font-size:11px;color:rgba(255,255,255,.4)}
+.sb-rv{font-size:12px;font-weight:700;font-family:var(--mono)}
+.sb-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.07);font-size:10px;color:rgba(255,255,255,.25)}
+/* MAIN */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:var(--card);border-bottom:1px solid var(--line);padding:0 24px;height:50px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:10}
+.tb-title{font-family:"Syne",sans-serif;font-size:14px;font-weight:700}
+.tb-pills{display:flex;gap:7px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--line)}
+.pill.an{background:var(--b2);color:var(--b);border-color:var(--b3)}
+.pill.ap{background:var(--g3);color:var(--g2);border-color:#A7F3D0}
+.pill.ne{background:var(--a2);color:#92400E;border-color:var(--a3)}
+.pill.pe{background:var(--r2);color:#991B1B;border-color:var(--r3)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* PAGE */
+.page{padding:20px 24px;flex:1}
+/* KPIs */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.kpi{background:var(--card);border-radius:12px;padding:14px 16px;border:1px solid var(--line)}
+.kpi-l{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:7px}
+.kpi-v{font-family:"Syne",sans-serif;font-size:22px;font-weight:700;line-height:1}
+.kpi-s{font-size:10px;color:var(--ink4);margin-top:4px}
+.kpi.cg{border-top:3px solid var(--g)}.kpi.cg .kpi-v{color:#065F46}
+.kpi.cb{border-top:3px solid var(--b)}.kpi.cb .kpi-v{color:#1E40AF}
+.kpi.ca{border-top:3px solid var(--a)}.kpi.ca .kpi-v{color:#92400E}
+.kpi.cr{border-top:3px solid var(--r)}.kpi.cr .kpi-v{color:#991B1B}
+/* FILTER BAR */
+.fbar{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);white-space:nowrap}
+.fsel{font-size:12px;padding:5px 9px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);outline:none;cursor:pointer;font-family:inherit}
+.fsel:focus{border-color:var(--g)}
+.finput{font-size:12px;padding:5px 9px;border-radius:7px;border:1px solid var(--line);background:var(--bg);color:var(--ink);outline:none;font-family:inherit;width:160px}
+.finput:focus{border-color:var(--g)}
+.bsm{font-size:11px;padding:5px 11px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--ink3);cursor:pointer;font-family:inherit}
+.bsm:hover{border-color:var(--g);color:var(--ink)}
+.fres{font-size:11px;color:var(--ink4);margin-left:auto;font-family:var(--mono);white-space:nowrap}
+/* month toggle chips */
+.mchip{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--ink3);cursor:pointer;font-family:inherit;transition:all .15s}
+.mchip.on{background:var(--g3);border-color:var(--g);color:var(--g2);font-weight:600}
+.mchip.onb{background:var(--b2);border-color:var(--b);color:var(--b);font-weight:600}
+/* CHARTS */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.cgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.cc{background:var(--card);border-radius:12px;border:1px solid var(--line);padding:16px 18px}
+.cc.full{grid-column:1/-1}
+.cc-t{font-family:"Syne",sans-serif;font-size:12px;font-weight:700;margin-bottom:2px}
+.cc-s{font-size:11px;color:var(--ink3);margin-bottom:12px}
+.leg{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:9px}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3)}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+/* TABLE */
+.tc{background:var(--card);border-radius:12px;border:1px solid var(--line);overflow:hidden;margin-bottom:16px}
+.tc-hd{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.txw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);background:#FAFBFC;white-space:nowrap}
+th.r,td.r{text-align:right}
+td{padding:9px 12px;border-bottom:1px solid var(--line2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFCFF}
+.mono{font-family:var(--mono);font-size:11px}
+.badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.ba{background:#DCFCE7;color:#166534}
+.bn{background:#DBEAFE;color:#1E3A8A}
+.bp{background:#FEE2E2;color:#991B1B}
+.bne{background:#FEF3C7;color:#92400E}
+.bv{background:#EDE9FE;color:#5B21B6}
+.bc{background:#E0F2FE;color:#075985}
+/* STATUS CARDS */
+.scards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.scard{border-radius:12px;padding:16px;border:1px solid;position:relative;overflow:hidden}
+.scard-ic{position:absolute;right:10px;top:8px;font-size:30px;opacity:.15}
+.scard-badge{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;display:block}
+.scard-n{font-family:"Syne",sans-serif;font-size:32px;font-weight:800;line-height:1}
+.scard-lbl{font-size:11px;font-weight:500;margin-bottom:5px}
+.scard-val{font-size:12px;font-weight:600;font-family:var(--mono)}
+.scard-sub{font-size:10px;opacity:.65;margin-top:2px}
+.scard.an{background:#EFF6FF;border-color:#BFDBFE;color:#1E3A8A}
+.scard.ap{background:#F0FDF4;border-color:#BBF7D0;color:#14532D}
+.scard.ne{background:#FFFBEB;border-color:#FDE68A;color:#78350F}
+.scard.pe{background:#FFF1F2;border-color:#FECDD3;color:#881337}
+/* FORM */
+.form-card{background:var(--card);border-radius:12px;border:1px solid var(--line);padding:22px;margin-bottom:18px}
+.form-t{font-family:"Syne",sans-serif;font-size:15px;font-weight:700;margin-bottom:3px}
+.form-s{font-size:12px;color:var(--ink3);margin-bottom:18px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+.fg input,.fg select,.fg textarea{font-size:13px;padding:8px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-family:inherit;outline:none}
+.fg input:focus,.fg select:focus{border-color:var(--g);background:#fff}
+.form-actions{display:flex;gap:9px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.bp-btn{font-size:13px;font-weight:600;padding:9px 22px;border-radius:8px;border:none;background:var(--g);color:#fff;cursor:pointer;font-family:inherit}
+.bp-btn:hover{background:var(--g2)}
+.bs-btn{font-size:13px;padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink3);cursor:pointer;font-family:inherit}
+.toast{background:#DCFCE7;border:1px solid #86EFAC;color:#166534;border-radius:8px;padding:9px 13px;font-size:12px;font-weight:500;margin-bottom:12px}
+.err{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:8px;padding:9px 13px;font-size:12px;margin-bottom:12px}
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:18px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:4px;width:fit-content;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:6px 14px;border-radius:7px;border:none;background:none;cursor:pointer;color:var(--ink3);font-family:inherit;white-space:nowrap}
+.tab.on{background:var(--ink);color:#fff;font-weight:600}
+.tab:hover:not(.on){background:var(--line2)}
+/* CARTEIRA CARDS */
+.cart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.ccard{border-radius:12px;padding:18px;border:2px solid}
+.ccard-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ccard-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ccard-title{font-family:"Syne",sans-serif;font-size:15px;font-weight:800}
+.ccard-n{font-size:11px;color:var(--ink3);margin-left:auto;font-family:var(--mono)}
+.ccard-vals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.cv-l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin-bottom:3px}
+.cv-v{font-family:"Syne",sans-serif;font-size:20px;font-weight:700}
+.pbar{background:var(--line2);border-radius:4px;height:5px;margin-bottom:12px}
+.pbfill{height:5px;border-radius:4px}
+.ccard-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cs{text-align:center;border-radius:7px;padding:6px 4px}
+.cs-n{font-family:"Syne",sans-serif;font-size:17px;font-weight:800}
+.cs-l{font-size:9px;font-weight:600;letter-spacing:.04em}
+.bwrap{display:flex;align-items:center;gap:6px}
+.bbg{flex:1;height:4px;background:var(--line);border-radius:2px;min-width:36px}
+.bfg{height:4px;border-radius:2px}
+.empty{display:flex;flex-direction:column;align-items:center;padding:40px;color:var(--ink4);text-align:center;gap:7px;font-size:13px}
+.bd-btn{font-size:10px;padding:4px 9px;border-radius:6px;border:1px solid var(--r3);background:var(--r2);color:#991B1B;cursor:pointer;font-family:inherit}
+@media(max-width:860px){.sb{display:none}.cgrid,.cgrid3,.scards,.cart-grid{grid-template-columns:1fr}.page{padding:14px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SEED_DATA = [{"data":"2026-01-02","vendedor":"Eduardo","cliente":"Veloz","material":"Granja/ ICO","valorOrcado":428352.42,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":428352.42,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-05","vendedor":"Eduardo","cliente":"FTD","material":"LOTE LITERATURA","valorOrcado":8473971.0,"proposta":"Planilha enviada dia 30/12","status":"Aprovado Janeiro","valorFechado":4442118.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-05","vendedor":"Jones","cliente":"CASA PUBLICADORA","material":"LOTE","valorOrcado":63678.45,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":63678.45,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-06","vendedor":"Villas Boas","cliente":"IRDIM","material":"Dá Origem à Origem","valorOrcado":56170.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-06","vendedor":"Formacerta","cliente":"Emunati","material":"Livro","valorOrcado":187680.0,"proposta":"515170","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-06","vendedor":"Marcia","cliente":"Todavia","material":"Livros","valorOrcado":34441.0,"proposta":"512723","status":"Aprovado Janeiro","valorFechado":34441.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-06","vendedor":"Marcia","cliente":"Moderna","material":"lote 0660","valorOrcado":27499.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":27499.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-07","vendedor":"Julius","cliente":"Ed. Do Brasil","material":"SC 73044","valorOrcado":702581.4,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":645000.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-07","vendedor":"Neto","cliente":"GEN","material":"Delmato","valorOrcado":57000.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":57000.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-07","vendedor":"Julius","cliente":"Ed. Do Brasil","material":"SC 730445","valorOrcado":391851.6,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-01-07","vendedor":"Marcia","cliente":"Macmillan","material":"Flashcards next station","valorOrcado":28509.66,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":28509.66,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-07","vendedor":"Marcia","cliente":"Todavia","material":"reimpressões todavia","valorOrcado":35116.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":35116.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-07","vendedor":"Marcia","cliente":"Antonio Kehl","material":"Antonio Kehl","valorOrcado":124911.1,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-07","vendedor":"Marcia","cliente":"Ação Educativa","material":"Diálogos na EJA","valorOrcado":58943.49,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-08","vendedor":"Renato","cliente":"OPET","material":"Pacote Ser e Viver","valorOrcado":335354.1,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-08","vendedor":"Renato","cliente":"OPET","material":"Pacote Fund 2","valorOrcado":39796.0,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-08","vendedor":"Neto","cliente":"Arco","material":"Chamado 1962","valorOrcado":140272.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":140272.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-08","vendedor":"Venda Direta","cliente":"SM","material":"Coleção Construir Juntos","valorOrcado":32530.1,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":32530.1,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-08","vendedor":"Marcia","cliente":"Moderna","material":"lote 0663","valorOrcado":29144.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":29144.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-09","vendedor":"Neto","cliente":"RT","material":"Especulativa fevereiro","valorOrcado":144970.86,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-01-09","vendedor":"Marcia","cliente":"Somos","material":"Lotes diversos 32 SKU","valorOrcado":200729.5,"proposta":"Cotarys","status":"Aprovado Janeiro","valorFechado":200729.5,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-09","vendedor":"Eduardo","cliente":"Veloz","material":"Balneario Camburiu","valorOrcado":674843.14,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":640956.1,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-09","vendedor":"Marcia","cliente":"Moderna","material":"lote 0658","valorOrcado":149949.75,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":149949.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-09","vendedor":"Marcia","cliente":"Moderna","material":"LOTE 0666","valorOrcado":120934.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":120934.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-09","vendedor":"Marcia","cliente":"Moderna","material":"TROCA DE CAPA","valorOrcado":250528.1,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-12","vendedor":"Neto","cliente":"RT","material":"Livro","valorOrcado":28034.73,"proposta":"514974","status":"Aprovado Janeiro","valorFechado":28034.73,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-12","vendedor":"Marcia","cliente":"Farol da Fé 2026","material":"Farol da Fé 2026","valorOrcado":100000.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":100000.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-12","vendedor":"Jones","cliente":"Arbore Editoração Eireli","material":"cotação","valorOrcado":62167.0,"proposta":"proposta","status":"Aprovado Janeiro","valorFechado":62167.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-12","vendedor":"Neto","cliente":"Arco","material":"Ways","valorOrcado":200121.7,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":200121.7,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-13","vendedor":"Marcia","cliente":"Somos","material":"Catalogo","valorOrcado":58499.31,"proposta":"516207","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-13","vendedor":"Fernanda","cliente":"Uptake idiomas","material":"Material didatico","valorOrcado":39034.6,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-13","vendedor":"Julius","cliente":"Ed. Do Brasil","material":"SC 730490","valorOrcado":294426.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":294426.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-13","vendedor":"Jones","cliente":"Unimed Seguradora","material":"cotação","valorOrcado":33934.32,"proposta":"proposta","status":"Aprovado Janeiro","valorFechado":33934.32,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-14","vendedor":"Fabiana","cliente":"Via Maker","material":"Astromaker internacional","valorOrcado":33856.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":33856.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-14","vendedor":"Eduardo","cliente":"Uniavan","material":"Seu book","valorOrcado":159727.3,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-14","vendedor":"Renato","cliente":"Impare","material":"Portifólio","valorOrcado":112981.93,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-14","vendedor":"Antonio","cliente":"JH Mizuno","material":"Coleção","valorOrcado":61381.42,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-14","vendedor":"Julius","cliente":"Atheneu","material":"Kit Cardiologia","valorOrcado":2118016.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-14","vendedor":"Neto","cliente":"RT","material":"Revistas","valorOrcado":221910.3,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-01-14","vendedor":"Julius","cliente":"Arco","material":"Chamado 1962 SAE","valorOrcado":140272.3,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":140272.3,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-14","vendedor":"Marcia","cliente":"Moderna","material":"lote 0674","valorOrcado":118029.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":48663.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-15","vendedor":"Marcia","cliente":"Moderna","material":"LOTE 400161/174 PETNORTE","valorOrcado":334999.81,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":334999.81,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-16","vendedor":"Formacerta","cliente":"Maquinaria Editorial","material":"livro","valorOrcado":27100.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-16","vendedor":"Marcia","cliente":"Moderna","material":"LOTE 400180 Exportação Chile","valorOrcado":1877333.0,"proposta":"Planilha","status":"Analise","valorFechado":301284.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-17","vendedor":"Zuleica","cliente":"Scarpa","material":"Coleção cirandar","valorOrcado":163360.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":163360.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-20","vendedor":"Lucas","cliente":"DSOP","material":"Livros","valorOrcado":48488.5,"proposta":"Planilha","status":"Negociação","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-21","vendedor":"Marcia","cliente":"Moderna","material":"lote 0685","valorOrcado":1475254.79,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":157603.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-21","vendedor":"Zuleica","cliente":"Kelvin","material":"Produção 2º Bimestre","valorOrcado":62080.64,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":62080.64,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-22","vendedor":"Marcia","cliente":"Moderna","material":"Lote 400180","valorOrcado":107104.8,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":107104.8,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-22","vendedor":"Neto","cliente":"Arco","material":"Chamado 2022","valorOrcado":78240.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":78240.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-22","vendedor":"Neto","cliente":"Arco","material":"Chamado 2019","valorOrcado":149905.03,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-01-22","vendedor":"Marcia","cliente":"Moderna","material":"lote 686","valorOrcado":143062.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":29224.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-23","vendedor":"Jones","cliente":"KNN","material":"Lote","valorOrcado":747100.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-23","vendedor":"Eduardo","cliente":"Arco","material":"Chamado 2029 SAS","valorOrcado":103235.5,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":103235.5,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-23","vendedor":"Julius","cliente":"Arco","material":"Chamado 2036 COC","valorOrcado":80239.4,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":80239.4,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-23","vendedor":"Alyssa","cliente":"Farol Editorial","material":"Livros","valorOrcado":479800.0,"proposta":"planilha","status":"Negociação","valorFechado":444560.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-26","vendedor":"Saulo","cliente":"Multimidia Educacional","material":"Kit","valorOrcado":943650.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-27","vendedor":"Marcia","cliente":"Macmillan","material":"QUOTE 5413408","valorOrcado":20351.53,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":20351.53,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-28","vendedor":"Marcia","cliente":"Moderna","material":"lote 800378","valorOrcado":1769964.0,"proposta":"Planilha","status":"Aprovado Janeiro","valorFechado":56124.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-28","vendedor":"Jones","cliente":"KNN","material":"LOTE","valorOrcado":982486.75,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-01-30","vendedor":"Marcia","cliente":"Moderna","material":"Lote 0704","valorOrcado":126552.0,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":25812.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-01-30","vendedor":"Jones","cliente":"KNN","material":"","valorOrcado":1004468.65,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-02","vendedor":"Jones","cliente":"Academia especifica","material":"","valorOrcado":306522.8,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":306522.8,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-03","vendedor":"Marcia","cliente":"Moderna","material":"Lote 800380","valorOrcado":122405.0,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":122405.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-03","vendedor":"Marcia","cliente":"Moderna","material":"Lote 400191","valorOrcado":107125.46,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":74030.18,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-04","vendedor":"Marcia","cliente":"Moderna","material":"lote 0711","valorOrcado":236405.8,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":25536.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-05","vendedor":"Fabiana","cliente":"LF","material":"LF4","valorOrcado":558345.8,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-05","vendedor":"Jones","cliente":"KNN","material":"","valorOrcado":909630.8,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-06","vendedor":"Marcia","cliente":"Moderna","material":"Lote 0710","valorOrcado":14069211.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-06","vendedor":"Marcia","cliente":"Moderna","material":"lote 0716","valorOrcado":661181.0,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":82749.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-09","vendedor":"Jones","cliente":"Igreja de Jesus Cristo","material":"","valorOrcado":332000.0,"proposta":"COTAÇÃO","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-11","vendedor":"Fabiana","cliente":"Via Maker","material":"Infantil SIM","valorOrcado":26345.0,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":24735.2,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-11","vendedor":"Jones","cliente":"CASA PUBLICADORA","material":"","valorOrcado":28804.0,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":28804.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-12","vendedor":"Marcia","cliente":"Moderna","material":"Lote 0724","valorOrcado":23088.6,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":23088.6,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-12","vendedor":"Jones","cliente":"Viva Metodologia","material":"lote","valorOrcado":252343.5,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":252343.5,"prazo":"","motivo":"","status2":""},{"data":"2026-02-13","vendedor":"Eduardo","cliente":"Instituto Senna","material":"Formula da Vitoria","valorOrcado":131953.56,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-13","vendedor":"Eduardo","cliente":"Instituto Senna","material":"Acelera Brasil","valorOrcado":259975.94,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-16","vendedor":"Marcia","cliente":"Moderna","material":"lote 0727","valorOrcado":931833.31,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":46926.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-19","vendedor":"Neto","cliente":"Arco","material":"2201","valorOrcado":70933.18,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":70933.18,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-20","vendedor":"Eduardo","cliente":"Instituto Senna","material":"Obras Se Liga","valorOrcado":381063.51,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-20","vendedor":"Fabiana","cliente":"Cultura Inglesa","material":"Jogos didaticos","valorOrcado":86631.1,"proposta":"Planilha","status":"Negociação","valorFechado":0.0,"prazo":"2026-04-02","motivo":"","status2":""},{"data":"2026-02-20","vendedor":"Eduardo","cliente":"FTD","material":"Livros","valorOrcado":1311277.2,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-02-20","vendedor":"Neto","cliente":"Arco","material":"2211","valorOrcado":24150.0,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":24150.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-20","vendedor":"Neto","cliente":"Arco","material":"2224","valorOrcado":137750.45,"proposta":"Planilha","status":"Aprovado Março","valorFechado":137750.45,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-23","vendedor":"Eduardo","cliente":"Sinapse","material":"Livro","valorOrcado":192109.29,"proposta":"Planilha","status":"Aprovado Março","valorFechado":108547.0,"prazo":"2026-03-20","motivo":"","status2":"Formalizado"},{"data":"2026-02-23","vendedor":"Neto","cliente":"Arco","material":"2227","valorOrcado":38761.0,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-02-25","vendedor":"Neto","cliente":"Arco","material":"2241","valorOrcado":220600.7,"proposta":"Planilha","status":"Aprovado Março","valorFechado":220600.7,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-25","vendedor":"Neto","cliente":"Arco","material":"2242","valorOrcado":166750.1,"proposta":"Planilha","status":"Aprovado Fevereiro","valorFechado":166750.1,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-02-26","vendedor":"Neto","cliente":"Arco","material":"2246","valorOrcado":62180.0,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-03-02","vendedor":"Neto","cliente":"GEN","material":"Livro","valorOrcado":46627.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":46627.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-02","vendedor":"Marcia","cliente":"Macmillan","material":"Cotação n° 5413771","valorOrcado":52728.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":52728.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-04","vendedor":"Marcia","cliente":"Moderna","material":"Lote 0751","valorOrcado":25292.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":25292.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-04","vendedor":"Neto","cliente":"Arco","material":"2288","valorOrcado":24793.4,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-03-04","vendedor":"Jones","cliente":"3B CADERNOS","material":"COTAÇÃO","valorOrcado":154500.0,"proposta":"PDF","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-03-05","vendedor":"Marcia","cliente":"Moderna","material":"Compartilha","valorOrcado":3339291.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-03-05","vendedor":"Neto","cliente":"Arco","material":"2294","valorOrcado":176009.12,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-03-05","vendedor":"Michele","cliente":"Align","material":"Kit","valorOrcado":61462.5,"proposta":"527765","status":"Aprovado Março","valorFechado":61462.5,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-05","vendedor":"Alyssa","cliente":"Legacy","material":"Repique de produção anterior","valorOrcado":58728.05,"proposta":"Planilha","status":"Aprovado Março","valorFechado":58728.05,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-06","vendedor":"Marcia","cliente":"Moderna","material":"Moderna_Core A","valorOrcado":59724502.98,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-03-09","vendedor":"Eduardo","cliente":"Martins e Martins","material":"Livros","valorOrcado":1668000.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"2026-03-16","motivo":"","status2":""},{"data":"2026-03-09","vendedor":"Eduardo","cliente":"Martins e Martins","material":"coleção","valorOrcado":961200.0,"proposta":"Planilha","status":"Negociação","valorFechado":0.0,"prazo":"2026-03-24","motivo":"","status2":""},{"data":"2026-03-09","vendedor":"Eduardo","cliente":"Sanar","material":"5 titulos","valorOrcado":38808.7,"proposta":"Planilha","status":"Aprovado Março","valorFechado":38808.7,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-09","vendedor":"Alyssa","cliente":"Criative","material":"Coleção","valorOrcado":64010.8,"proposta":"Planilha","status":"Aprovado Março","valorFechado":64010.8,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-10","vendedor":"Marcia","cliente":"Ação Educativa","material":"Diálogos na EJA","valorOrcado":111492.82,"proposta":"Planilha","status":"Aprovado Março","valorFechado":111492.82,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-10","vendedor":"Neto","cliente":"Arco","material":"2298","valorOrcado":42668.8,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-03-10","vendedor":"Jones","cliente":"Palavra Educação","material":"lote","valorOrcado":1290395.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"","motivo":"","status2":""},{"data":"2026-03-12","vendedor":"Eduardo","cliente":"Sanar","material":"3 titulos","valorOrcado":21250.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":21250.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-12","vendedor":"Neto","cliente":"Arco","material":"2348","valorOrcado":58100.0,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-03-12","vendedor":"Formacerta","cliente":"Novo Século","material":"Materiais diversos","valorOrcado":28391.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":28391.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-13","vendedor":"Neto","cliente":"Arco","material":"2350","valorOrcado":110910.0,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"","motivo":"Perdeu Prazo","status2":""},{"data":"2026-03-16","vendedor":"Neto","cliente":"Arco","material":"2102","valorOrcado":434290.2,"proposta":"Planilha","status":"Aprovado Março","valorFechado":434290.2,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-16","vendedor":"Julius","cliente":"Medcof","material":"Simulados","valorOrcado":560000.0,"proposta":"529988","status":"Analise","valorFechado":0.0,"prazo":"2026-03-23","motivo":"","status2":""},{"data":"2026-03-16","vendedor":"Julius","cliente":"Medcof","material":"R+ modelo novo","valorOrcado":93648.5,"proposta":"Planilha","status":"Aprovado Março","valorFechado":93648.5,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-17","vendedor":"Formacerta","cliente":"IBL Idiomas","material":"Coleção","valorOrcado":120841.2,"proposta":"Planilha","status":"Aprovado Março","valorFechado":120841.2,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-18","vendedor":"Villas Boas","cliente":"Sisttech","material":"Coleção explorador","valorOrcado":1018194.96,"proposta":"Planilha","status":"Negociação","valorFechado":0.0,"prazo":"2026-03-26","motivo":"","status2":""},{"data":"2026-03-18","vendedor":"Marcia","cliente":"Moderna","material":"7965","valorOrcado":167027.0,"proposta":"Planilha","status":"Negociação","valorFechado":34861.0,"prazo":"","motivo":"","status2":"Formalizado"},{"data":"2026-03-18","vendedor":"Alyssa","cliente":"Krieduc","material":"Coleção","valorOrcado":54598.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":54598.0,"prazo":"","motivo":"","status2":"OS Aberta"},{"data":"2026-03-18","vendedor":"Formacerta","cliente":"Ler Mais","material":"Coleção","valorOrcado":396293.3,"proposta":"Planilha","status":"Aprovado Março","valorFechado":396293.3,"prazo":"","motivo":"","status2":""},{"data":"2026-03-20","vendedor":"Marcia","cliente":"Moderna","material":"lote 0766","valorOrcado":488038.7,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"2026-03-27","motivo":"","status2":""},{"data":"2026-03-23","vendedor":"Neto","cliente":"GEN","material":"SARLET / MARINONI","valorOrcado":31864.8,"proposta":"530580","status":"Negociação","valorFechado":0.0,"prazo":"2026-03-30","motivo":"","status2":""},{"data":"2026-03-23","vendedor":"Marcia","cliente":"Moderna","material":"Lote 800421/800422","valorOrcado":350848.0,"proposta":"Planilha","status":"Aprovado Março","valorFechado":52204.0,"prazo":"2026-03-30","motivo":"","status2":"OS Aberta"},{"data":"2026-03-24","vendedor":"Julius","cliente":"Uninter","material":"Coleção","valorOrcado":41930.41,"proposta":"Planilha","status":"Aprovado Março","valorFechado":62000.0,"prazo":"2026-03-31","motivo":"","status2":"OS Aberta"},{"data":"2026-03-24","vendedor":"Neto","cliente":"Gen","material":"CUBAS TRATADO DE ANIMAIS","valorOrcado":159140.0,"proposta":"530985","status":"Negociação","valorFechado":140000.0,"prazo":"2026-03-31","motivo":"","status2":""},{"data":"2026-03-26","vendedor":"Julius","cliente":"Red House","material":"Segundo semestre","valorOrcado":754669.9,"proposta":"Planilha","status":"Aprovado Março","valorFechado":754669.9,"prazo":"2026-03-30","motivo":"","status2":"OS Aberta"},{"data":"2026-03-26","vendedor":"Fernanda","cliente":"Editora DC","material":"Coleção","valorOrcado":127660.0,"proposta":"Planilha","status":"Negociação","valorFechado":0.0,"prazo":"2026-04-02","motivo":"","status2":""},{"data":"2026-03-30","vendedor":"Eduardo","cliente":"Veloz","material":"Coleção EJA","valorOrcado":1906256.5,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"2026-04-06","motivo":"","status2":""},{"data":"2026-03-31","vendedor":"Fabiana","cliente":"LF","material":"Coleção Smartgen","valorOrcado":205506.6,"proposta":"Planilha","status":"Perdido","valorFechado":0.0,"prazo":"2026-04-07","motivo":"Perdeu Preço","status2":""},{"data":"2026-04-02","vendedor":"Marcia","cliente":"Moderna","material":"Lote 800443","valorOrcado":27714.0,"proposta":"Planilha","status":"Aprovado Abril","valorFechado":25229.0,"prazo":"2026-04-09","motivo":"","status2":"OS Aberta"},{"data":"2026-04-02","vendedor":"Renato","cliente":"Oxford","material":"Super Star","valorOrcado":128895.0,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"2026-04-09","motivo":"","status2":""},{"data":"2026-04-06","vendedor":"Marcia","cliente":"Moderna","material":"Lacrada","valorOrcado":1693945.75,"proposta":"Planilha","status":"Analise","valorFechado":0.0,"prazo":"2026-04-13","motivo":"","status2":""},{"data":"2026-04-07","vendedor":"Villas Boas","cliente":"Unicesumar","material":"lote","valorOrcado":168234.88,"proposta":"Planilha","status":"Aprovado Abril","valorFechado":168234.88,"prazo":"2026-04-14","motivo":"","status2":""}];
+</script>
+<script type="text/babel">
+const {useState,useEffect,useRef,useMemo,useCallback}=React;
+
+/* ── STORAGE ── */
+const SK="fc_cot_v4";
+const load=()=>{try{const s=localStorage.getItem(SK);if(s)return JSON.parse(s)}catch(e){}return null};
+const save=d=>{try{localStorage.setItem(SK,JSON.stringify(d))}catch(e){}};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
+
+/* ── CONSTANTS ── */
+const VENDS=["Alyssa","Antonio","Claudio","Eduardo","Fabiana","Fernanda","Formacerta","Formacerta Licitação","Jones","Julius","Lucas Gutierrez","Marcia","Marcia/Jones","Michele","Neto","Renato","Saulo","Venda Direta","Villas Boas","Zuleica"];
+const MOTIVOS=["Perdeu Prazo","Perdeu Preço","Cliente cancelou","Concorrência","Sem resposta","Outro"];
+const CARTEIRAS={
+  "Fabrício":["Venda Direta","Formacerta","Formacerta Licitação","Julius","Marcia","Jones","Claudio","Villas Boas","Fabiana","Zuleica","Marcia/Jones"],
+  "Neto":["Saulo","Alyssa","Antonio","Neto","Eduardo","Michele","Fernanda","Renato","Lucas Gutierrez","Lucas"]
+};
+const CART_COR={"Fabrício":"#7C3AED","Neto":"#0284C7","Outros":"#64748B"};
+const getCart=v=>{for(const[c,vs]of Object.entries(CARTEIRAS)){if(vs.some(x=>x.toLowerCase()===v.toLowerCase()))return c}return"Outros"};
+const MES={"2026-01":"Jan","2026-02":"Fev","2026-03":"Mar","2026-04":"Abr","2026-05":"Mai","2026-06":"Jun","2026-07":"Jul","2026-08":"Ago","2026-09":"Set","2026-10":"Out","2026-11":"Nov","2026-12":"Dez"};
+const MESF={"2026-01":"Janeiro","2026-02":"Fevereiro","2026-03":"Março","2026-04":"Abril","2026-05":"Maio","2026-06":"Junho","2026-07":"Julho","2026-08":"Agosto","2026-09":"Setembro","2026-10":"Outubro","2026-11":"Novembro","2026-12":"Dezembro"};
+const gm=d=>d?d.slice(0,7):"";
+const sG=s=>{if(!s)return"Analise";const u=s.trim();if(u.startsWith("Aprovado"))return"Aprovado";if(u==="Perdido")return"Perdido";if(u==="Negociação"||u==="Negociacao")return"Negociação";return"Analise"};
+const BADGE={Aprovado:"ba",Analise:"bn",Perdido:"bp","Negociação":"bne"};
+const Rk=v=>{if(v>=1e6)return`R$ ${(v/1e6).toFixed(1).replace(".",",")}M`;if(v>=1e3)return`R$ ${(v/1e3).toFixed(0)}k`;return`R$ ${Math.round(v).toLocaleString("pt-BR")}`};
+const Rf=v=>`R$ ${Math.round(v).toLocaleString("pt-BR")}`;
+
+/* ── CHART ── */
+function CC({type,data,opts,h=220}){
+  const r=useRef(null),i=useRef(null);
+  useEffect(()=>{
+    if(!r.current)return;
+    if(i.current)i.current.destroy();
+    i.current=new Chart(r.current,{type,data,options:{...opts,responsive:true,maintainAspectRatio:false}});
+    return()=>{if(i.current)i.current.destroy()};
+  },[JSON.stringify(data)]);
+  return <div style={{position:"relative",height:h}}><canvas ref={r}/></div>;
+}
+const LEG=({it})=><div className="leg">{it.map(([l,c],i)=><div key={i} className="li"><div className="ld" style={{background:c}}/>{l}</div>)}</div>;
+const bO={plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Rk(c.parsed.y??c.parsed)}`}}},scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:0}},y:{ticks:{callback:v=>Rk(v)},grid:{color:"#F1F5F9"}}}};
+const hO={indexAxis:"y",plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${Rk(c.parsed.x)}`}}},scales:{x:{ticks:{callback:v=>Rk(v)},grid:{color:"#F1F5F9"}},y:{grid:{display:false},ticks:{autoSkip:false}}}};
+const dO={cutout:"62%",plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.parsed}`}}}};
+
+/* ── DATE CELL ── */
+const DC=({d})=>{
+  if(!d)return <span>-</span>;
+  const dt=new Date(d+"T12:00:00");
+  return <span className="mono">{dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"})}</span>;
+};
+const PC=({d})=>{
+  if(!d||!d.includes("-"))return <span>-</span>;
+  const dt=new Date(d.slice(0,10)+"T12:00:00");
+  const venc=dt<new Date();
+  return <span style={{color:venc?"#991B1B":"var(--ink3)",fontWeight:venc?600:400,fontSize:11}}>{dt.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})}{venc?" ⚠️":""}</span>;
+};
+const CartTag=({v})=>{
+  const c=getCart(v);
+  const cor=CART_COR[c]||"#64748B";
+  return <span style={{fontSize:10,fontWeight:600,padding:"2px 7px",borderRadius:20,background:`${cor}18`,color:cor}}>{c}</span>;
+};
+
+/* ══════════════ FORM ══════════════ */
+function FormCotacao({onAdd}){
+  const blank={data:new Date().toISOString().slice(0,10),vendedor:"",cliente:"",material:"",valorOrcado:"",proposta:"",status:"Analise",valorFechado:"",prazo:"",motivo:"",status2:""};
+  const [f,setF]=useState(blank);
+  const [ok,setOk]=useState(false);
+  const [err,setErr]=useState("");
+  const set=(k,v)=>setF(p=>({...p,[k]:v}));
+  const isAp=sG(f.status)==="Aprovado";
+  const isPe=f.status==="Perdido";
+  const submit=()=>{
+    if(!f.vendedor||!f.cliente||!f.valorOrcado){setErr("Preencha: Vendedor, Cliente e Valor Orçado.");return}
+    onAdd({...f,id:uid(),valorOrcado:parseFloat(f.valorOrcado)||0,valorFechado:parseFloat(f.valorFechado)||0});
+    setF(blank);setOk(true);setErr("");setTimeout(()=>setOk(false),3000);
+  };
+  return(
+    <div className="form-card">
+      <div className="form-t">➕ Nova Cotação</div>
+      <div className="form-s">Campos com * são obrigatórios.</div>
+      {ok&&<div className="toast">✓ Cotação registrada com sucesso!</div>}
+      {err&&<div className="err">{err}</div>}
+      <div className="fgrid">
+        <div className="fg"><label>Data *</label><input type="date" value={f.data} onChange={e=>set("data",e.target.value)}/></div>
+        <div className="fg"><label>Vendedor *</label>
+          <select value={f.vendedor} onChange={e=>set("vendedor",e.target.value)}>
+            <option value="">Selecione...</option>
+            {VENDS.map(v=><option key={v}>{v}</option>)}
+            <option value="__novo__">+ Novo vendedor</option>
+          </select>
+          {f.vendedor==="__novo__"&&<input style={{marginTop:5}} placeholder="Nome do novo vendedor" onBlur={e=>{if(e.target.value.trim())set("vendedor",e.target.value.trim())}} autoFocus/>}
+        </div>
+        <div className="fg"><label>Cliente *</label><input placeholder="Nome do cliente" value={f.cliente} onChange={e=>set("cliente",e.target.value)}/></div>
+        <div className="fg"><label>Material</label><input placeholder="Ex: Lote 0800..." value={f.material} onChange={e=>set("material",e.target.value)}/></div>
+        <div className="fg"><label>Valor Orçado (R$) *</label><input type="number" placeholder="0,00" value={f.valorOrcado} onChange={e=>set("valorOrcado",e.target.value)}/></div>
+        <div className="fg"><label>Proposta / Nº</label><input placeholder="Ex: Planilha, 530980..." value={f.proposta} onChange={e=>set("proposta",e.target.value)}/></div>
+        <div className="fg"><label>Status</label>
+          <select value={f.status} onChange={e=>set("status",e.target.value)}>
+            <option value="Analise">Em Análise</option>
+            <option value="Aprovado Janeiro">Aprovado Janeiro</option>
+            <option value="Aprovado Fevereiro">Aprovado Fevereiro</option>
+            <option value="Aprovado Março">Aprovado Março</option>
+            <option value="Aprovado Abril">Aprovado Abril</option>
+            <option value="Aprovado Maio">Aprovado Maio</option>
+            <option value="Aprovado Junho">Aprovado Junho</option>
+            <option value="Negociação">Negociação</option>
+            <option value="Perdido">Perdido</option>
+          </select>
+        </div>
+        {isAp&&<div className="fg"><label>Valor Fechado (R$)</label><input type="number" placeholder="0,00" value={f.valorFechado} onChange={e=>set("valorFechado",e.target.value)}/></div>}
+        {isAp&&<div className="fg"><label>Status Interno</label><select value={f.status2} onChange={e=>set("status2",e.target.value)}><option value="">—</option><option>OS Aberta</option><option>Formalizado</option></select></div>}
+        <div className="fg"><label>Prazo de Retorno</label><input type="date" value={f.prazo} onChange={e=>set("prazo",e.target.value)}/></div>
+        {isPe&&<div className="fg"><label>Motivo da Perda</label><select value={f.motivo} onChange={e=>set("motivo",e.target.value)}><option value="">Selecione...</option>{MOTIVOS.map(m=><option key={m}>{m}</option>)}</select></div>}
+      </div>
+      <div className="form-actions">
+        <button className="bp-btn" onClick={submit}>Registrar Cotação</button>
+        <button className="bs-btn" onClick={()=>{setF(blank);setErr("")}}>Limpar</button>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════ DASHBOARD ══════════════ */
+function Dashboard({data}){
+  const [tab,setTab]=useState("geral");
+  const [fMeses,setFMeses]=useState([]);
+  const [fCart,setFCart]=useState("todos");
+  const [fVend,setFVend]=useState("todos");
+  const [fSt,setFSt]=useState("todos");
+  const [fCli,setFCli]=useState("");
+  const [fVmin,setFVmin]=useState("");
+  const [fVmax,setFVmax]=useState("");
+  const [anMeses,setAnMeses]=useState([]);
+
+  const allMeses=useMemo(()=>[...new Set(data.map(r=>gm(r.data)).filter(Boolean))].sort(),[data]);
+  const allVends=useMemo(()=>[...new Set(data.map(r=>r.vendedor))].sort(),[data]);
+
+  const togM=m=>setFMeses(p=>p.includes(m)?p.filter(x=>x!==m):[...p,m]);
+  const togAN=m=>setAnMeses(p=>p.includes(m)?p.filter(x=>x!==m):[...p,m]);
+
+  const filt=useMemo(()=>data.filter(r=>{
+    if(fMeses.length>0&&!fMeses.includes(gm(r.data)))return false;
+    if(fCart!=="todos"&&getCart(r.vendedor)!==fCart)return false;
+    if(fVend!=="todos"&&r.vendedor!==fVend)return false;
+    if(fSt!=="todos"){
+      if(fSt==="Aprovado"&&sG(r.status)!=="Aprovado")return false;
+      if(fSt!=="Aprovado"&&sG(r.status)!==fSt)return false;
+    }
+    if(fCli&&!r.cliente.toLowerCase().includes(fCli.toLowerCase()))return false;
+    if(fVmin&&r.valorOrcado<parseFloat(fVmin))return false;
+    if(fVmax&&r.valorOrcado>parseFloat(fVmax))return false;
+    return true;
+  }),[data,fMeses,fCart,fVend,fSt,fCli,fVmin,fVmax]);
+
+  const filtAN=useMemo(()=>data.filter(r=>{
+    if(sG(r.status)!=="Analise")return false;
+    if(anMeses.length>0&&!anMeses.includes(gm(r.data)))return false;
+    if(fCart!=="todos"&&getCart(r.vendedor)!==fCart)return false;
+    if(fVend!=="todos"&&r.vendedor!==fVend)return false;
+    return true;
+  }),[data,anMeses,fCart,fVend]);
+
+  const K=useMemo(()=>{
+    const tO=filt.reduce((s,r)=>s+r.valorOrcado,0);
+    const tF=filt.reduce((s,r)=>s+r.valorFechado,0);
+    const ap=filt.filter(r=>sG(r.status)==="Aprovado");
+    const pe=filt.filter(r=>r.status==="Perdido");
+    const ne=filt.filter(r=>sG(r.status)==="Negociação");
+    const an=filt.filter(r=>sG(r.status)==="Analise");
+    return{n:filt.length,tO,tF,conv:tO>0?tF/tO:0,apN:ap.length,apV:ap.reduce((s,r)=>s+r.valorFechado,0),peN:pe.length,peV:pe.reduce((s,r)=>s+r.valorOrcado,0),neN:ne.length,neV:ne.reduce((s,r)=>s+r.valorOrcado,0),anN:an.length,anV:an.reduce((s,r)=>s+r.valorOrcado,0)};
+  },[filt]);
+
+  const mensalD=useMemo(()=>{
+    const ks=fMeses.length>0?fMeses.slice().sort():allMeses;
+    const src=filt;
+    return{labels:ks.map(k=>MES[k]||k),datasets:[
+      {label:"Orçado",data:ks.map(k=>src.filter(r=>gm(r.data)===k).reduce((s,r)=>s+r.valorOrcado,0)),backgroundColor:"#00C58E",borderRadius:5},
+      {label:"Fechado",data:ks.map(k=>src.filter(r=>gm(r.data)===k).reduce((s,r)=>s+r.valorFechado,0)),backgroundColor:"#2563EB",borderRadius:5},
+    ]};
+  },[filt,fMeses,allMeses]);
+
+  const donutD=useMemo(()=>{
+    const c={Aprovado:0,Analise:0,Perdido:0,"Negociação":0};
+    filt.forEach(r=>c[sG(r.status)]++);
+    return{labels:Object.keys(c),datasets:[{data:Object.values(c),backgroundColor:["#00C58E","#2563EB","#EF4444","#F59E0B"],borderWidth:2,borderColor:"#fff",hoverOffset:5}]};
+  },[filt]);
+
+  const vendRank=useMemo(()=>{
+    const m={};
+    filt.forEach(r=>{if(!m[r.vendedor])m[r.vendedor]={n:0,orc:0,fech:0,ap:0,pe:0};m[r.vendedor].n++;m[r.vendedor].orc+=r.valorOrcado;m[r.vendedor].fech+=r.valorFechado;if(sG(r.status)==="Aprovado")m[r.vendedor].ap++;if(r.status==="Perdido")m[r.vendedor].pe++});
+    return Object.entries(m).sort((a,b)=>b[1].fech-a[1].fech);
+  },[filt]);
+
+  const cliRank=useMemo(()=>{
+    const m={};
+    filt.forEach(r=>{if(!r.cliente)return;const k=r.cliente.trim();if(!m[k])m[k]={n:0,orc:0,fech:0};m[k].n++;m[k].orc+=r.valorOrcado;m[k].fech+=r.valorFechado});
+    return Object.entries(m).sort((a,b)=>b[1].orc-a[1].orc).slice(0,20);
+  },[filt]);
+
+  const cartData=useMemo(()=>{
+    const res={};
+    for(const c of Object.keys(CARTEIRAS))res[c]=filt.filter(r=>getCart(r.vendedor)===c);
+    return res;
+  },[filt]);
+
+  const maxCartOrc=useMemo(()=>Math.max(...Object.values(cartData).map(rows=>rows.reduce((s,r)=>s+r.valorOrcado,0)),1),[cartData]);
+
+  const vChart=useMemo(()=>({
+    labels:vendRank.slice(0,10).map(v=>v[0]),
+    datasets:[
+      {label:"Orçado",data:vendRank.slice(0,10).map(v=>v[1].orc),backgroundColor:"#00C58E",borderRadius:4},
+      {label:"Fechado",data:vendRank.slice(0,10).map(v=>v[1].fech),backgroundColor:"#2563EB",borderRadius:4}
+    ]
+  }),[vendRank]);
+
+  const cliChart=useMemo(()=>({
+    labels:cliRank.slice(0,10).map(([c])=>c.length>22?c.slice(0,22)+"…":c),
+    datasets:[
+      {label:"Orçado",data:cliRank.slice(0,10).map(([,d])=>d.orc),backgroundColor:"#00C58E",borderRadius:4},
+      {label:"Fechado",data:cliRank.slice(0,10).map(([,d])=>d.fech),backgroundColor:"#2563EB",borderRadius:4}
+    ]
+  }),[cliRank]);
+
+  const cartChart=useMemo(()=>({
+    labels:Object.keys(CARTEIRAS).map(c=>"Carteira "+c),
+    datasets:[
+      {label:"Orçado",data:Object.keys(CARTEIRAS).map(c=>cartData[c]?.reduce((s,r)=>s+r.valorOrcado,0)||0),backgroundColor:["#7C3AED","#0284C7"],borderRadius:5},
+      {label:"Fechado",data:Object.keys(CARTEIRAS).map(c=>cartData[c]?.reduce((s,r)=>s+r.valorFechado,0)||0),backgroundColor:["#A78BFA","#38BDF8"],borderRadius:5}
+    ]
+  }),[cartData]);
+
+  const clearAll=()=>{setFMeses([]);setFCart("todos");setFVend("todos");setFSt("todos");setFCli("");setFVmin("");setFVmax("");setAnMeses([])};
+
+  /* ── CarteiraCard ── */
+  const CarteiraCard=({name,rows})=>{
+    const cor=CART_COR[name]||"#64748B";
+    const tO=rows.reduce((s,r)=>s+r.valorOrcado,0);
+    const tF=rows.reduce((s,r)=>s+r.valorFechado,0);
+    const apN=rows.filter(r=>sG(r.status)==="Aprovado").length;
+    const anN=rows.filter(r=>sG(r.status)==="Analise").length;
+    const peN=rows.filter(r=>r.status==="Perdido").length;
+    const neN=rows.filter(r=>sG(r.status)==="Negociação").length;
+    const conv=tO>0?Math.round(tF/tO*100):0;
+    const barW=maxCartOrc>0?Math.round(tO/maxCartOrc*100):0;
+    const stats=[["Análise","#2563EB",anN],["Aprov.","#00C58E",apN],["Negoc.","#F59E0B",neN],["Perd.","#EF4444",peN]];
+    return(
+      <div className="ccard" style={{borderColor:`${cor}44`,borderTopWidth:4,borderTopColor:cor}}>
+        <div className="ccard-head">
+          <div className="ccard-dot" style={{background:cor}}/>
+          <span className="ccard-title">Carteira {name}</span>
+          <span className="ccard-n">{rows.length} cots.</span>
+        </div>
+        <div className="ccard-vals">
+          <div><div className="cv-l">Total Orçado</div><div className="cv-v" style={{color:"var(--ink)"}}>{Rk(tO)}</div></div>
+          <div><div className="cv-l">Total Fechado</div><div className="cv-v" style={{color:"#065F46"}}>{Rk(tF)}</div></div>
+        </div>
+        <div className="pbar"><div className="pbfill" style={{width:`${barW}%`,background:cor}}/></div>
+        <div className="ccard-stats">
+          {stats.map(([l,c,n])=>(
+            <div key={l} className="cs" style={{background:`${c}11`,border:`1px solid ${c}33`}}>
+              <div className="cs-n" style={{color:c}}>{n}</div>
+              <div className="cs-l" style={{color:c}}>{l}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{marginTop:10,textAlign:"right",fontSize:11,color:"var(--ink3)"}}>
+          Conversão: <strong style={{color:conv>30?"#065F46":"var(--ink)"}}>{conv}%</strong>
+        </div>
+      </div>
+    );
+  };
+
+  return(<>
+    {/* FILTER BAR */}
+    <div className="fbar">
+      <span className="fl">Meses</span>
+      <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+        {allMeses.map(m=>(
+          <button key={m} className={`mchip${fMeses.includes(m)?" on":""}`} onClick={()=>togM(m)}>{MESF[m]||m}</button>
+        ))}
+      </div>
+      <span className="fl">Carteira</span>
+      <select className="fsel" value={fCart} onChange={e=>setFCart(e.target.value)}>
+        <option value="todos">Todas</option>
+        {Object.keys(CARTEIRAS).map(c=><option key={c} value={c}>Carteira {c}</option>)}
+      </select>
+      <span className="fl">Vendedor</span>
+      <select className="fsel" value={fVend} onChange={e=>setFVend(e.target.value)}>
+        <option value="todos">Todos</option>
+        {allVends.map(v=><option key={v}>{v}</option>)}
+      </select>
+      <span className="fl">Status</span>
+      <select className="fsel" value={fSt} onChange={e=>setFSt(e.target.value)}>
+        <option value="todos">Todos</option>
+        <option value="Aprovado">Aprovado</option>
+        <option value="Analise">Em Análise</option>
+        <option value="Negociação">Negociação</option>
+        <option value="Perdido">Perdido</option>
+      </select>
+      <span className="fl">Cliente</span>
+      <input className="finput" placeholder="Buscar cliente..." value={fCli} onChange={e=>setFCli(e.target.value)}/>
+      <span className="fl">Valor</span>
+      <input className="finput" style={{width:85}} placeholder="Mín R$" type="number" value={fVmin} onChange={e=>setFVmin(e.target.value)}/>
+      <input className="finput" style={{width:85}} placeholder="Máx R$" type="number" value={fVmax} onChange={e=>setFVmax(e.target.value)}/>
+      <button className="bsm" onClick={clearAll}>✕ Limpar</button>
+      <span className="fres">{filt.length} / {data.length}</span>
+    </div>
+
+    {/* KPIS */}
+    <div className="kgrid">
+      <div className="kpi"><div className="kpi-l">Total</div><div className="kpi-v">{K.n}</div><div className="kpi-s">cotações</div></div>
+      <div className="kpi cg"><div className="kpi-l">Orçado</div><div className="kpi-v">{Rk(K.tO)}</div><div className="kpi-s">{Rf(K.tO)}</div></div>
+      <div className="kpi cb"><div className="kpi-l">Fechado</div><div className="kpi-v">{Rk(K.tF)}</div><div className="kpi-s">{Rf(K.tF)}</div></div>
+      <div className="kpi ca"><div className="kpi-l">Conversão</div><div className="kpi-v">{(K.conv*100).toFixed(1)}%</div><div className="kpi-s">fechado / orçado</div></div>
+      <div className="kpi cg"><div className="kpi-l">Aprovados</div><div className="kpi-v">{K.apN}</div><div className="kpi-s">{Rk(K.apV)} fechado</div></div>
+      <div className="kpi cb"><div className="kpi-l">Em Análise</div><div className="kpi-v">{K.anN}</div><div className="kpi-s">{Rk(K.anV)} em aberto</div></div>
+      <div className="kpi ca"><div className="kpi-l">Negociação</div><div className="kpi-v">{K.neN}</div><div className="kpi-s">{Rk(K.neV)} em jogo</div></div>
+      <div className="kpi cr"><div className="kpi-l">Perdidos</div><div className="kpi-v">{K.peN}</div><div className="kpi-s">{Rk(K.peV)} perdido</div></div>
+    </div>
+
+    {/* TABS */}
+    <div className="tabs">
+      {[["geral","📊 Geral"],["carteiras","🗂️ Carteiras"],["analise","⏳ Em Análise"],["status","📋 Por Status"],["clientes","🏢 Por Cliente"],["vendedores","👤 Por Vendedor"]].map(([id,lbl])=>(
+        <button key={id} className={`tab${tab===id?" on":""}`} onClick={()=>setTab(id)}>{lbl}</button>
+      ))}
+    </div>
+
+    {/* TAB GERAL */}
+    {tab==="geral"&&<>
+      <div className="cgrid">
+        <div className="cc">
+          <div className="cc-t">Orçado × Fechado por Mês</div>
+          <div className="cc-s">Evolução mensal em R$</div>
+          <LEG it={[["Orçado","#00C58E"],["Fechado","#2563EB"]]}/>
+          <CC type="bar" data={mensalD} opts={bO} h={210}/>
+        </div>
+        <div className="cc">
+          <div className="cc-t">Status das Cotações</div>
+          <div className="cc-s">Distribuição por quantidade</div>
+          <LEG it={[["Aprovado","#00C58E"],["Análise","#2563EB"],["Perdido","#EF4444"],["Negociação","#F59E0B"]]}/>
+          <CC type="doughnut" data={donutD} opts={dO} h={210}/>
+        </div>
+      </div>
+      <div className="cc full" style={{marginBottom:14}}>
+        <div className="cc-t">Top Vendedores — Orçado vs Fechado</div>
+        <div className="cc-s">Ranking por valor</div>
+        <LEG it={[["Orçado","#00C58E"],["Fechado","#2563EB"]]}/>
+        <CC type="bar" data={vChart} opts={hO} h={Math.max(240,vendRank.slice(0,10).length*36+60)}/>
+      </div>
+    </>}
+
+    {/* TAB CARTEIRAS */}
+    {tab==="carteiras"&&<>
+      <div className="cart-grid">
+        {Object.keys(CARTEIRAS).map(c=><CarteiraCard key={c} name={c} rows={cartData[c]||[]}/>)}
+      </div>
+      <div className="cc full" style={{marginBottom:14}}>
+        <div className="cc-t">Comparativo de Carteiras</div>
+        <div className="cc-s">Orçado vs Fechado</div>
+        <LEG it={[["Orçado Fabrício","#7C3AED"],["Fechado Fabrício","#A78BFA"],["Orçado Neto","#0284C7"],["Fechado Neto","#38BDF8"]]}/>
+        <CC type="bar" data={cartChart} opts={bO} h={200}/>
+      </div>
+      {Object.entries(CARTEIRAS).map(([cart,vends])=>{
+        const cor=CART_COR[cart]||"#64748B";
+        const rows=filt.filter(r=>getCart(r.vendedor)===cart);
+        const vr=Object.entries(rows.reduce((m,r)=>{if(!m[r.vendedor])m[r.vendedor]={n:0,orc:0,fech:0,ap:0,pe:0};m[r.vendedor].n++;m[r.vendedor].orc+=r.valorOrcado;m[r.vendedor].fech+=r.valorFechado;if(sG(r.status)==="Aprovado")m[r.vendedor].ap++;if(r.status==="Perdido")m[r.vendedor].pe++;return m},{})).sort((a,b)=>b[1].fech-a[1].fech);
+        return(
+          <div key={cart} className="tc" style={{marginBottom:14}}>
+            <div className="tc-hd" style={{marginBottom:10}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:9,height:9,borderRadius:"50%",background:cor}}/>
+                <span className="syne" style={{fontWeight:800,fontSize:14,color:cor}}>Carteira {cart}</span>
+                <span style={{fontSize:11,color:"var(--ink3)"}}>{vends.join(", ")}</span>
+              </div>
+            </div>
+            <div className="txw"><table>
+              <thead><tr><th>#</th><th>Vendedor</th><th className="r">Cots.</th><th className="r">Orçado</th><th className="r">Fechado</th><th className="r">Conv.</th><th className="r">Aprov.</th><th className="r">Perd.</th></tr></thead>
+              <tbody>{vr.map(([v,d],i)=>{
+                const conv=d.orc>0?Math.round(d.fech/d.orc*100):0;
+                return(
+                  <tr key={v}>
+                    <td style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--ink3)",width:24}}>{["🥇","🥈","🥉"][i]||i+1}</td>
+                    <td style={{fontWeight:700}}>{v}</td>
+                    <td className="r mono">{d.n}</td>
+                    <td className="r mono" style={{fontWeight:700}}>{Rk(d.orc)}</td>
+                    <td className="r mono" style={{color:d.fech>0?"#065F46":"var(--ink4)",fontWeight:d.fech>0?700:400}}>{d.fech>0?Rk(d.fech):"—"}</td>
+                    <td className="r">
+                      <div className="bwrap" style={{justifyContent:"flex-end"}}>
+                        <div className="bbg"><div className="bfg" style={{width:`${Math.min(100,conv)}%`,background:cor}}/></div>
+                        <span className="mono" style={{color:conv>30?"#065F46":"var(--ink3)"}}>{conv}%</span>
+                      </div>
+                    </td>
+                    <td className="r"><span className="badge ba">{d.ap}</span></td>
+                    <td className="r"><span className="badge bp">{d.pe}</span></td>
+                  </tr>
+                );
+              })}</tbody>
+            </table></div>
+          </div>
+        );
+      })}
+    </>}
+
+    {/* TAB EM ANÁLISE */}
+    {tab==="analise"&&<>
+      <div className="fbar" style={{marginBottom:14}}>
+        <span className="fl">Filtrar por mês</span>
+        <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+          {allMeses.map(m=>{
+            const cnt=data.filter(r=>sG(r.status)==="Analise"&&gm(r.data)===m&&(fCart==="todos"||getCart(r.vendedor)===fCart)&&(fVend==="todos"||r.vendedor===fVend)).length;
+            return(
+              <button key={m} className={`mchip${anMeses.includes(m)?" onb":""}`} onClick={()=>togAN(m)}>
+                {MESF[m]||m} <span style={{fontFamily:"var(--mono)",fontSize:10,marginLeft:2,opacity:.7}}>{cnt}</span>
+              </button>
+            );
+          })}
+        </div>
+        {anMeses.length>0&&<button className="bsm" onClick={()=>setAnMeses([])}>✕</button>}
+        <span className="fres">{filtAN.length} em análise · {Rk(filtAN.reduce((s,r)=>s+r.valorOrcado,0))}</span>
+      </div>
+      <div className="tc">
+        <div className="tc-hd" style={{marginBottom:12}}>
+          <span className="syne" style={{fontWeight:700,fontSize:14,color:"#1E40AF"}}>
+            ⏳ Em Análise{anMeses.length>0?" · "+anMeses.map(m=>MESF[m]).join(", "):" · Todos os meses"}
+          </span>
+        </div>
+        <div className="txw"><table>
+          <thead><tr><th>Data</th><th>Vendedor</th><th>Carteira</th><th>Cliente</th><th>Material</th><th className="r">Valor Orçado</th><th>Prazo</th><th>OS</th></tr></thead>
+          <tbody>
+            {filtAN.length===0&&<tr><td colSpan={8}><div className="empty"><span style={{fontSize:28}}>🔍</span><span>Nenhuma cotação em análise para esse filtro.</span></div></td></tr>}
+            {[...filtAN].sort((a,b)=>b.data.localeCompare(a.data)).map((r,i)=>(
+              <tr key={r.id||i}>
+                <td><DC d={r.data}/></td>
+                <td style={{fontWeight:600}}>{r.vendedor}</td>
+                <td><CartTag v={r.vendedor}/></td>
+                <td style={{maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:500}}>{r.cliente||"-"}</td>
+                <td style={{maxWidth:140,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--ink3)",fontSize:11}}>{r.material||"-"}</td>
+                <td className="r mono" style={{fontWeight:700}}>{Rk(r.valorOrcado)}</td>
+                <td><PC d={r.prazo}/></td>
+                <td style={{fontSize:10}}>{r.status2?<span className="badge ba">{r.status2}</span>:"-"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table></div>
+      </div>
+    </>}
+
+    {/* TAB STATUS */}
+    {tab==="status"&&<>
+      <div className="scards">
+        <div className="scard an"><div className="scard-ic">⏳</div><span className="scard-badge">Em Análise</span><div className="scard-n">{K.anN}</div><div className="scard-lbl">aguardando retorno</div><div className="scard-val">{Rk(K.anV)}</div><div className="scard-sub">valor em aberto</div></div>
+        <div className="scard ap"><div className="scard-ic">✅</div><span className="scard-badge">Aprovados</span><div className="scard-n">{K.apN}</div><div className="scard-lbl">negócios fechados</div><div className="scard-val">{Rk(K.apV)}</div><div className="scard-sub">valor fechado</div></div>
+        <div className="scard ne"><div className="scard-ic">🤝</div><span className="scard-badge">Negociação</span><div className="scard-n">{K.neN}</div><div className="scard-lbl">em andamento</div><div className="scard-val">{Rk(K.neV)}</div><div className="scard-sub">valor em jogo</div></div>
+        <div className="scard pe"><div className="scard-ic">❌</div><span className="scard-badge">Perdidos</span><div className="scard-n">{K.peN}</div><div className="scard-lbl">oportunidades perdidas</div><div className="scard-val">{Rk(K.peV)}</div><div className="scard-sub">valor perdido</div></div>
+      </div>
+      {["Analise","Aprovado","Negociação","Perdido"].map(st=>{
+        const rows=[...filt].filter(r=>sG(r.status)===st).sort((a,b)=>b.valorOrcado-a.valorOrcado);
+        if(!rows.length)return null;
+        const lbl={Analise:"⏳ Em Análise",Aprovado:"✅ Aprovados","Negociação":"🤝 Negociação",Perdido:"❌ Perdidos"}[st];
+        const clr={Analise:"#1E40AF",Aprovado:"#166534","Negociação":"#92400E",Perdido:"#991B1B"}[st];
+        const totO=rows.reduce((s,r)=>s+r.valorOrcado,0);
+        const totF=rows.reduce((s,r)=>s+r.valorFechado,0);
+        return(
+          <div key={st} className="tc" style={{marginBottom:14}}>
+            <div className="tc-hd" style={{marginBottom:10}}>
+              <span className="syne" style={{fontWeight:700,fontSize:14,color:clr}}>{lbl}</span>
+              <span style={{fontSize:11,color:"var(--ink3)",fontFamily:"var(--mono)"}}>
+                {rows.length} cots · {Rk(totO)} orçado{st==="Aprovado"?" · "+Rk(totF)+" fechado":""}
+              </span>
+            </div>
+            <div className="txw"><table>
+              <thead><tr>
+                <th>Data</th><th>Vendedor</th><th>Carteira</th><th>Cliente</th><th>Material</th>
+                <th className="r">Valor Orçado</th>
+                {(st==="Aprovado"||st==="Negociação")&&<th className="r">Valor Fechado</th>}
+                <th>Prazo</th>
+                {st==="Perdido"&&<th>Motivo</th>}
+                <th>OS</th>
+              </tr></thead>
+              <tbody>{rows.map((r,i)=>(
+                <tr key={r.id||i}>
+                  <td><DC d={r.data}/></td>
+                  <td style={{fontWeight:600,whiteSpace:"nowrap"}}>{r.vendedor}</td>
+                  <td><CartTag v={r.vendedor}/></td>
+                  <td style={{maxWidth:120,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:500}}>{r.cliente||"-"}</td>
+                  <td style={{maxWidth:140,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--ink3)",fontSize:11}}>{r.material||"-"}</td>
+                  <td className="r mono" style={{fontWeight:700}}>{Rk(r.valorOrcado)}</td>
+                  {(st==="Aprovado"||st==="Negociação")&&<td className="r mono" style={{color:r.valorFechado>0?"#065F46":"var(--ink4)",fontWeight:r.valorFechado>0?700:400}}>{r.valorFechado>0?Rk(r.valorFechado):"—"}</td>}
+                  <td><PC d={r.prazo}/></td>
+                  {st==="Perdido"&&<td style={{fontSize:11,color:"#991B1B"}}>{r.motivo||"-"}</td>}
+                  <td style={{fontSize:10}}>{r.status2?<span className="badge ba">{r.status2}</span>:"-"}</td>
+                </tr>
+              ))}</tbody>
+            </table></div>
+          </div>
+        );
+      })}
+    </>}
+
+    {/* TAB CLIENTES */}
+    {tab==="clientes"&&<>
+      <div className="cc full" style={{marginBottom:14}}>
+        <div className="cc-t">Top 10 Clientes — Orçado vs Fechado</div>
+        <div className="cc-s">Ranking por valor orçado</div>
+        <LEG it={[["Orçado","#00C58E"],["Fechado","#2563EB"]]}/>
+        <CC type="bar" data={cliChart} opts={hO} h={Math.max(260,Math.min(10,cliRank.length)*40+60)}/>
+      </div>
+      <div className="tc">
+        <div className="tc-hd"><div>
+          <div className="syne" style={{fontWeight:700,fontSize:14}}>Ranking por Cliente</div>
+          <div style={{fontSize:11,color:"var(--ink3)",marginTop:2}}>{cliRank.length} clientes únicos</div>
+        </div></div>
+        <div className="txw" style={{marginTop:12}}><table>
+          <thead><tr><th>#</th><th>Cliente</th><th className="r">Cots.</th><th className="r">Valor Orçado</th><th className="r">Valor Fechado</th><th className="r">Conv.</th><th>Participação</th></tr></thead>
+          <tbody>{cliRank.map(([cli,d],i)=>{
+            const maxO=cliRank[0]?.[1]?.orc||1;
+            const p=Math.round(d.orc/maxO*100);
+            const conv=d.orc>0?Math.round(d.fech/d.orc*100):0;
+            return(
+              <tr key={cli}>
+                <td style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--ink3)",width:24}}>{["🥇","🥈","🥉"][i]||i+1}</td>
+                <td style={{fontWeight:600,maxWidth:150,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cli}</td>
+                <td className="r mono">{d.n}</td>
+                <td className="r mono" style={{fontWeight:700}}>{Rk(d.orc)}</td>
+                <td className="r mono" style={{color:d.fech>0?"#065F46":"var(--ink4)",fontWeight:d.fech>0?700:400}}>{d.fech>0?Rk(d.fech):"—"}</td>
+                <td className="r mono" style={{color:conv>30?"#065F46":"var(--ink3)"}}>{conv}%</td>
+                <td><div className="bwrap"><div className="bbg"><div className="bfg" style={{width:`${p}%`,background:"#00C58E"}}/></div><span style={{fontSize:10,color:"var(--ink4)",minWidth:28,fontFamily:"var(--mono)"}}>{p}%</span></div></td>
+              </tr>
+            );
+          })}</tbody>
+        </table></div>
+      </div>
+    </>}
+
+    {/* TAB VENDEDORES */}
+    {tab==="vendedores"&&<div className="tc">
+      <div className="tc-hd"><div className="syne" style={{fontWeight:700,fontSize:14}}>Performance por Vendedor</div></div>
+      <div className="txw" style={{marginTop:12}}><table>
+        <thead><tr><th>#</th><th>Vendedor</th><th>Carteira</th><th className="r">Cots.</th><th className="r">Orçado</th><th className="r">Fechado</th><th className="r">Conv.</th><th className="r">Aprov.</th><th className="r">Perd.</th></tr></thead>
+        <tbody>{vendRank.map(([v,d],i)=>{
+          const conv=d.orc>0?Math.round(d.fech/d.orc*100):0;
+          return(
+            <tr key={v}>
+              <td style={{fontFamily:"var(--mono)",fontSize:11,color:"var(--ink3)",width:24}}>{["🥇","🥈","🥉"][i]||i+1}</td>
+              <td style={{fontWeight:700}}>{v}</td>
+              <td><CartTag v={v}/></td>
+              <td className="r mono">{d.n}</td>
+              <td className="r mono" style={{fontWeight:700}}>{Rk(d.orc)}</td>
+              <td className="r mono" style={{color:d.fech>0?"#065F46":"var(--ink4)",fontWeight:d.fech>0?700:400}}>{d.fech>0?Rk(d.fech):"—"}</td>
+              <td className="r">
+                <div className="bwrap" style={{justifyContent:"flex-end"}}>
+                  <div className="bbg"><div className="bfg" style={{width:`${Math.min(100,conv)}%`,background:conv>30?"#00C58E":"#2563EB"}}/></div>
+                  <span className="mono" style={{color:conv>30?"#065F46":"var(--ink3)"}}>{conv}%</span>
+                </div>
+              </td>
+              <td className="r"><span className="badge ba">{d.ap}</span></td>
+              <td className="r"><span className="badge bp">{d.pe}</span></td>
+            </tr>
+          );
+        })}</tbody>
+      </table></div>
+    </div>}
+  </>);
+}
+
+/* ══════════════ COTAÇÕES TABLE ══════════════ */
+function Cotacoes({data,onDel,onEdit}){
+  const [fMes,setFMes]=useState("todos");
+  const [fVend,setFVend]=useState("todos");
+  const [fSt,setFSt]=useState("todos");
+  const [fCli,setFCli]=useState("");
+  const [fVmin,setFVmin]=useState("");
+  const [fVmax,setFVmax]=useState("");
+  const [editId,setEditId]=useState(null);
+  const [editRow,setEditRow]=useState(null);
+
+  const allMeses=useMemo(()=>[...new Set(data.map(r=>gm(r.data)).filter(Boolean))].sort(),[data]);
+  const allVends=useMemo(()=>[...new Set(data.map(r=>r.vendedor))].sort(),[data]);
+
+  const filt=useMemo(()=>data.filter(r=>{
+    if(fMes!=="todos"&&gm(r.data)!==fMes)return false;
+    if(fVend!=="todos"&&r.vendedor!==fVend)return false;
+    if(fSt!=="todos"){
+      if(fSt==="Aprovado"&&sG(r.status)!=="Aprovado")return false;
+      if(fSt!=="Aprovado"&&sG(r.status)!==fSt)return false;
+    }
+    if(fCli&&!r.cliente.toLowerCase().includes(fCli.toLowerCase()))return false;
+    if(fVmin&&r.valorOrcado<parseFloat(fVmin))return false;
+    if(fVmax&&r.valorOrcado>parseFloat(fVmax))return false;
+    return true;
+  }).sort((a,b)=>b.data.localeCompare(a.data)),[data,fMes,fVend,fSt,fCli,fVmin,fVmax]);
+
+  return(<>
+    <div className="fbar">
+      <span className="fl">Mês</span>
+      <select className="fsel" value={fMes} onChange={e=>setFMes(e.target.value)}>
+        <option value="todos">Todos</option>
+        {allMeses.map(m=><option key={m} value={m}>{MESF[m]||m}</option>)}
+      </select>
+      <span className="fl">Vendedor</span>
+      <select className="fsel" value={fVend} onChange={e=>setFVend(e.target.value)}>
+        <option value="todos">Todos</option>
+        {allVends.map(v=><option key={v}>{v}</option>)}
+      </select>
+      <span className="fl">Status</span>
+      <select className="fsel" value={fSt} onChange={e=>setFSt(e.target.value)}>
+        <option value="todos">Todos</option>
+        <option value="Aprovado">Aprovado</option>
+        <option value="Analise">Em Análise</option>
+        <option value="Negociação">Negociação</option>
+        <option value="Perdido">Perdido</option>
+      </select>
+      <span className="fl">Cliente</span>
+      <input className="finput" placeholder="Buscar..." value={fCli} onChange={e=>setFCli(e.target.value)}/>
+      <span className="fl">Valor</span>
+      <input className="finput" style={{width:80}} placeholder="Mín" type="number" value={fVmin} onChange={e=>setFVmin(e.target.value)}/>
+      <input className="finput" style={{width:80}} placeholder="Máx" type="number" value={fVmax} onChange={e=>setFVmax(e.target.value)}/>
+      <button className="bsm" onClick={()=>{setFMes("todos");setFVend("todos");setFSt("todos");setFCli("");setFVmin("");setFVmax("")}}>✕ Limpar</button>
+      <span className="fres">{filt.length} / {data.length}</span>
+    </div>
+    <div className="tc">
+      <div className="txw"><table>
+        <thead><tr>
+          <th>Data</th><th>Vendedor</th><th>Carteira</th><th>Cliente</th><th>Material</th><th>Proposta</th>
+          <th className="r">Orçado</th><th className="r">Fechado</th><th>Status</th><th>Prazo</th><th>Motivo</th><th>OS</th><th></th>
+        </tr></thead>
+        <tbody>
+          {filt.length===0&&<tr><td colSpan={13}><div className="empty"><span>🔍</span><span>Nenhuma cotação encontrada.</span></div></td></tr>}
+          {filt.map((r,i)=>{
+            const sg=sG(r.status);
+            if(editId===r.id&&editRow){
+              const is=(k)=><input style={{fontSize:11,padding:"3px 6px",border:"1px solid var(--a)",borderRadius:5,width:"100%",fontFamily:"inherit"}} value={editRow[k]||""} onChange={e=>setEditRow(p=>({...p,[k]:e.target.value}))}/>;
+              const ss=(k,opts)=><select style={{fontSize:11,padding:"3px 6px",border:"1px solid var(--a)",borderRadius:5,fontFamily:"inherit"}} value={editRow[k]||""} onChange={e=>setEditRow(p=>({...p,[k]:e.target.value}))}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>;
+              return(
+                <tr key={r.id} style={{background:"#FFFBEB"}}>
+                  <td><input type="date" style={{fontSize:11,padding:"3px 6px",border:"1px solid var(--a)",borderRadius:5}} value={editRow.data||""} onChange={e=>setEditRow(p=>({...p,data:e.target.value}))}/></td>
+                  <td>{ss("vendedor",VENDS)}</td>
+                  <td><CartTag v={editRow.vendedor||""}/></td>
+                  <td>{is("cliente")}</td>
+                  <td>{is("material")}</td>
+                  <td>{is("proposta")}</td>
+                  <td><input type="number" style={{fontSize:11,padding:"3px 6px",border:"1px solid var(--a)",borderRadius:5,width:90}} value={editRow.valorOrcado||0} onChange={e=>setEditRow(p=>({...p,valorOrcado:parseFloat(e.target.value)||0}))}/></td>
+                  <td><input type="number" style={{fontSize:11,padding:"3px 6px",border:"1px solid var(--a)",borderRadius:5,width:90}} value={editRow.valorFechado||0} onChange={e=>setEditRow(p=>({...p,valorFechado:parseFloat(e.target.value)||0}))}/></td>
+                  <td>{ss("status",["Analise","Aprovado Janeiro","Aprovado Fevereiro","Aprovado Março","Aprovado Abril","Aprovado Maio","Negociação","Perdido"])}</td>
+                  <td><input type="date" style={{fontSize:11,padding:"3px 6px",border:"1px solid var(--a)",borderRadius:5}} value={editRow.prazo||""} onChange={e=>setEditRow(p=>({...p,prazo:e.target.value}))}/></td>
+                  <td>{is("motivo")}</td>
+                  <td>{ss("status2",["","OS Aberta","Formalizado"])}</td>
+                  <td>
+                    <div style={{display:"flex",gap:4}}>
+                      <button style={{fontSize:11,padding:"3px 8px",borderRadius:5,border:"none",background:"#00C58E",color:"#fff",cursor:"pointer"}} onClick={()=>{onEdit(editRow);setEditId(null);setEditRow(null)}}>✓</button>
+                      <button style={{fontSize:11,padding:"3px 8px",borderRadius:5,border:"1px solid var(--line)",background:"#fff",cursor:"pointer"}} onClick={()=>{setEditId(null);setEditRow(null)}}>✕</button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            }
+            return(
+              <tr key={r.id||i}>
+                <td><DC d={r.data}/></td>
+                <td style={{fontWeight:600,whiteSpace:"nowrap"}}>{r.vendedor}</td>
+                <td><CartTag v={r.vendedor}/></td>
+                <td style={{maxWidth:110,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:500}}>{r.cliente||"-"}</td>
+                <td style={{maxWidth:130,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--ink3)",fontSize:11}}>{r.material||"-"}</td>
+                <td style={{fontSize:11,color:"var(--ink4)"}}>{r.proposta||"-"}</td>
+                <td className="r mono" style={{fontWeight:700}}>{Rk(r.valorOrcado)}</td>
+                <td className="r mono" style={{color:r.valorFechado>0?"#065F46":"var(--ink4)",fontWeight:r.valorFechado>0?700:400}}>{r.valorFechado>0?Rk(r.valorFechado):"—"}</td>
+                <td><span className={"badge "+(BADGE[sg]||"bn")}>{sg}</span></td>
+                <td><PC d={r.prazo}/></td>
+                <td style={{fontSize:11,color:"#991B1B"}}>{r.motivo||"-"}</td>
+                <td style={{fontSize:10}}>{r.status2?<span className="badge ba">{r.status2}</span>:"-"}</td>
+                <td>
+                  <div style={{display:"flex",gap:4}}>
+                    <button style={{fontSize:11,padding:"3px 8px",borderRadius:5,border:"1px solid var(--line)",background:"var(--bg)",cursor:"pointer",color:"var(--ink3)"}} onClick={()=>{setEditId(r.id);setEditRow({...r})}}>✎</button>
+                    <button className="bd-btn" onClick={()=>{if(confirm("Excluir esta cotação?"))onDel(r.id)}}>✕</button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table></div>
+    </div>
+  </>);
+}
+
+/* ══════════════ ROOT ══════════════ */
+function App(){
+  const [page,setPage]=useState("dash");
+  const [data,setData]=useState(()=>{
+    const saved=load();
+    if(saved&&saved.length>0)return saved;
+    return SEED_DATA.map(r=>({...r,id:uid()}));
+  });
+
+  useEffect(()=>save(data),[data]);
+
+  const addCot=useCallback(r=>setData(p=>[r,...p]),[]);
+  const delCot=useCallback(id=>setData(p=>p.filter(r=>r.id!==id)),[]);
+  const editCot=useCallback(u=>setData(p=>p.map(r=>r.id===u.id?u:r)),[]);
+
+  const cnt=useMemo(()=>{
+    const c={Analise:0,Aprovado:0,"Negociação":0,Perdido:0};
+    data.forEach(r=>c[sG(r.status)]++);
+    return c;
+  },[data]);
+
+  const cartCnt=useMemo(()=>{
+    const res={};
+    for(const c of Object.keys(CARTEIRAS))res[c]=data.filter(r=>getCart(r.vendedor)===c).length;
+    return res;
+  },[data]);
+
+  const nav=[
+    {id:"dash",lbl:"Dashboard"},
+    {id:"nova",lbl:"Nova Cotação"},
+    {id:"cots",lbl:"Cotações"},
+  ];
+
+  return(
+    <div className="shell">
+      <nav className="sb">
+        <div className="sb-brand">
+          <div className="sb-logo">FORMA CERTA</div>
+          <div className="sb-sub">Sistema de Cotações 2026</div>
+        </div>
+        <div className="sb-nav">
+          <div className="sb-sec">Menu</div>
+          {nav.map(n=>(
+            <div key={n.id} className={"sb-item"+(page===n.id?" on":"")} onClick={()=>setPage(n.id)}>{n.lbl}</div>
+          ))}
+          <div className="sb-sec" style={{marginTop:10}}>Carteiras</div>
+          {Object.entries(CARTEIRAS).map(([c])=>{
+            const cor=CART_COR[c]||"#64748B";
+            return(
+              <div key={c} className="sb-row">
+                <span className="sb-rl" style={{display:"flex",alignItems:"center",gap:5}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",background:cor,display:"inline-block"}}/>
+                  {c}
+                </span>
+                <span className="sb-rv" style={{color:cor}}>{cartCnt[c]||0}</span>
+              </div>
+            );
+          })}
+          <div className="sb-sec" style={{marginTop:10}}>Status</div>
+          {[["Análise","#2563EB","Analise"],["Aprovados","#00C58E","Aprovado"],["Negociação","#F59E0B","Negociação"],["Perdidos","#EF4444","Perdido"]].map(([l,cor,k])=>(
+            <div key={k} className="sb-row">
+              <span className="sb-rl">{l}</span>
+              <span className="sb-rv" style={{color:cor}}>{cnt[k]||0}</span>
+            </div>
+          ))}
+        </div>
+        <div className="sb-footer">{data.length} cotações · dados salvos localmente</div>
+      </nav>
+      <div className="main">
+        <div className="topbar">
+          <div className="tb-title">{{dash:"📊 Dashboard",nova:"➕ Nova Cotação",cots:"📋 Cotações"}[page]}</div>
+          <div className="tb-pills">
+            <span className="pill an"><span className="dot"/>Análise: {cnt.Analise}</span>
+            <span className="pill ap">Aprovados: {cnt.Aprovado}</span>
+            <span className="pill ne">Negoc.: {cnt["Negociação"]}</span>
+            <span className="pill pe">Perdidos: {cnt.Perdido}</span>
+          </div>
+        </div>
+        <div className="page">
+          {page==="dash"&&<Dashboard data={data}/>}
+          {page==="nova"&&<FormCotacao onAdd={r=>{addCot(r);setPage("dash")}}/>}
+          {page==="cots"&&<Cotacoes data={data} onDel={delCot} onEdit={editCot}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
